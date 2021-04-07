@@ -112,6 +112,8 @@ func (q *Quiz) Run() QuizResult {
 	quizResult := QuizResult{}
 
 	fmt.Printf("Starting quiz with timeout=%s\n", q.Timeout)
+	fmt.Printf("Please, press enter when you'll be ready.\n")
+	<-answers
 
 	quizFailed := false
 
