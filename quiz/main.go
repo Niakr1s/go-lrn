@@ -14,6 +14,7 @@ import (
 var csvFilePath = flag.String("csv", "", "path to csv file in format 'question, answer'")
 var timeout = flag.Duration("timeout", time.Second*15, "quiz answer timeout")
 var shuffle = flag.Bool("shuffle", false, "shuffle questions")
+var maxQuestions = flag.Int("max", 0, "max questions")
 
 func init() {
 	flag.Parse()
@@ -29,6 +30,7 @@ func main() {
 		AnswerProvider:  answerProvider,
 		Timeout:         *timeout,
 		Shuffle:         *shuffle,
+		MaxQuestions:    *maxQuestions,
 	}
 	quizResult := quiz.Run()
 	fmt.Printf("Quiz ended: %v\n", quizResult)
@@ -97,8 +99,9 @@ type Quiz struct {
 	ProblemProvider ProblemProvider
 	AnswerProvider  AnswerProvider
 
-	Timeout time.Duration
-	Shuffle bool
+	Timeout      time.Duration
+	Shuffle      bool
+	MaxQuestions int
 }
 
 type QuizResult struct {
@@ -126,6 +129,9 @@ func (q *Quiz) Run() QuizResult {
 	}
 	if q.Shuffle {
 		rand.Shuffle(len(problemsArr), swapProblemArr(problemsArr))
+	}
+	if q.MaxQuestions > 0 && q.MaxQuestions <= len(problemsArr) {
+		problemsArr = problemsArr[:q.MaxQuestions]
 	}
 
 	quizResult := QuizResult{}
