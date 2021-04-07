@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"os"
 	"strings"
@@ -70,7 +71,7 @@ type CsvProblemProvider struct {
 func (p *CsvProblemProvider) Problems() <-chan Problem {
 	file, err := os.Open(p.CsvFilePath)
 	if err != nil {
-		panic(fmt.Errorf("file open error: %v", err))
+		log.Fatalf("file open error: %v", err)
 	}
 
 	ch := make(chan Problem)
@@ -84,7 +85,7 @@ func (p *CsvProblemProvider) Problems() <-chan Problem {
 				break
 			}
 			if err != nil {
-				panic(fmt.Errorf("error while reading csv file: %v", err))
+				log.Fatalf("error while reading csv file: %v", err)
 			}
 			problem := Problem{Question: record[0], Answer: record[1]}
 			ch <- problem
