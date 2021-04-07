@@ -8,6 +8,7 @@ import (
 	"io"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -150,7 +151,8 @@ loop:
 			fmt.Printf("Time out.\n")
 			break loop
 		case answer := <-answers:
-			if problem.Answer != answer {
+			if !compareStringsNonStrict(answer, problem.Answer) {
+				// if problem.Answer != answer {
 				fmt.Printf("Incorrect.\n")
 			} else {
 				fmt.Printf("Correct.\n")
@@ -159,4 +161,12 @@ loop:
 		}
 	}
 	return quizResult
+}
+
+func compareStringsNonStrict(str, expectedStr string) bool {
+	str = strings.TrimSpace(str)
+	str = strings.ToLower(str)
+	expectedStr = strings.ToLower(expectedStr)
+
+	return str == expectedStr
 }
