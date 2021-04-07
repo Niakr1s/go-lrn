@@ -129,31 +129,23 @@ func (q *Quiz) Run() QuizResult {
 	}
 
 	quizResult := QuizResult{}
+	quizResult.Total = len(problemsArr)
 
 	fmt.Printf("Starting quiz with timeout=%s\n", q.Timeout)
 	fmt.Printf("Please, press enter when you'll be ready.\n")
 	<-answers
 
-	quizFailed := false
-
+loop:
 	for _, problem := range problemsArr {
-		quizResult.Total++
-
-		if quizFailed {
-			// to draw all problems and set total to valid value
-			continue
-		}
-
 		fmt.Println(problem.Question)
 
 		select {
 		case <-time.After(q.Timeout):
 			fmt.Printf("Time out.\n")
-			quizFailed = true
+			break loop
 		case answer := <-answers:
 			if problem.Answer != answer {
 				fmt.Printf("Incorrect.\n")
-				quizFailed = true
 			} else {
 				fmt.Printf("Correct.\n")
 				quizResult.Solved++
