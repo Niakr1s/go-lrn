@@ -24,7 +24,8 @@ func main() {
 		ProblemProvider: problemProvider,
 		AnswerProvider:  answerProvider,
 	}
-	quiz.Run()
+	quizResult := quiz.Run()
+	fmt.Printf("Quiz ended: %v\n", quizResult)
 }
 
 type AnswerProvider interface {
@@ -93,20 +94,39 @@ type Quiz struct {
 	Timeout time.Duration
 }
 
-func (q *Quiz) Run() {
+type QuizResult struct {
+	Solved int
+	Total  int
+}
+
+func (qr QuizResult) String() string {
+	return fmt.Sprintf("solved %d of %d", qr.Solved, qr.Total)
+}
+
+func (q *Quiz) Run() QuizResult {
 	problems := q.ProblemProvider.Problems()
 	answers := q.AnswerProvider.Answer()
 
-	solved := 0
+	quizResult := QuizResult{}
+
+	quizFailed := false
 	for problem := range problems {
+		quizResult.Total++
+
+		if quizFailed {
+			// to draw all problems and set total to valid value
+			continue
+		}
+
 		fmt.Println(problem.Question)
 		answer := <-answers
 		if problem.Answer != answer {
 			fmt.Printf("Incorrect.\n")
-			break
+			quizFailed = true
+			continue
 		}
 		fmt.Printf("Correct.\n")
-		solved++
+		quizResult.Solved++
 	}
-	fmt.Printf("You have solved %d problems.\n", solved)
+	return quizResult
 }
