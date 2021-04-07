@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 )
 
 var csvFilePath = flag.String("csv", "", "path to csv file in format 'question, answer'")
@@ -19,7 +20,11 @@ func main() {
 	problemProvider := &CsvProblemProvider{CsvFilePath: *csvFilePath}
 	answerProvider := &StdinAnswerProvider{}
 
-	RunQuiz(problemProvider, answerProvider)
+	quiz := &Quiz{
+		ProblemProvider: problemProvider,
+		AnswerProvider:  answerProvider,
+	}
+	quiz.Run()
 }
 
 type AnswerProvider interface {
@@ -81,9 +86,16 @@ func (p *CsvProblemProvider) Problems() <-chan Problem {
 	return ch
 }
 
-func RunQuiz(problemProvider ProblemProvider, answerProvider AnswerProvider) {
-	problems := problemProvider.Problems()
-	answers := answerProvider.Answer()
+type Quiz struct {
+	ProblemProvider ProblemProvider
+	AnswerProvider  AnswerProvider
+
+	Timeout time.Duration
+}
+
+func (q *Quiz) Run() {
+	problems := q.ProblemProvider.Problems()
+	answers := q.AnswerProvider.Answer()
 
 	solved := 0
 	for problem := range problems {
