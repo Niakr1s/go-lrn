@@ -12,17 +12,15 @@ import (
 	"time"
 )
 
-var csvFilePath = flag.String("csv", "", "path to csv file in format 'question, answer'")
-var timeout = flag.Duration("timeout", time.Second*15, "quiz answer timeout")
-var shuffle = flag.Bool("shuffle", false, "shuffle questions")
-var maxQuestions = flag.Int("max", 0, "max questions")
+func main() {
+	csvFilePath := flag.String("csv", "", "path to csv file in format 'question, answer'")
+	timeout := flag.Duration("timeout", time.Second*15, "quiz answer timeout")
+	shuffle := flag.Bool("shuffle", false, "shuffle questions")
+	maxQuestions := flag.Int("max", 0, "max questions")
 
-func init() {
 	flag.Parse()
 	rand.Seed(time.Now().UnixNano())
-}
 
-func main() {
 	problemProvider := &CsvProblemProvider{CsvFilePath: *csvFilePath}
 	answerProvider := &StdinAnswerProvider{}
 
