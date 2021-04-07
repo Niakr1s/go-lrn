@@ -6,15 +6,18 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"time"
 )
 
 var csvFilePath = flag.String("csv", "", "path to csv file in format 'question, answer'")
 var timeout = flag.Duration("timeout", time.Second*15, "quiz answer timeout")
+var shuffle = flag.Bool("shuffle", false, "shuffle questions")
 
 func init() {
 	flag.Parse()
+	rand.Seed(time.Now().UnixNano())
 }
 
 func main() {
@@ -25,6 +28,7 @@ func main() {
 		ProblemProvider: problemProvider,
 		AnswerProvider:  answerProvider,
 		Timeout:         *timeout,
+		Shuffle:         *shuffle,
 	}
 	quizResult := quiz.Run()
 	fmt.Printf("Quiz ended: %v\n", quizResult)
@@ -94,6 +98,7 @@ type Quiz struct {
 	AnswerProvider  AnswerProvider
 
 	Timeout time.Duration
+	Shuffle bool
 }
 
 type QuizResult struct {
@@ -105,9 +110,23 @@ func (qr QuizResult) String() string {
 	return fmt.Sprintf("solved %d of %d", qr.Solved, qr.Total)
 }
 
+func swapProblemArr(arr []Problem) func(i, j int) {
+	return func(i, j int) {
+		arr[i], arr[j] = arr[j], arr[i]
+	}
+}
+
 func (q *Quiz) Run() QuizResult {
 	problems := q.ProblemProvider.Problems()
 	answers := q.AnswerProvider.Answer()
+
+	problemsArr := []Problem{}
+	for problem := range problems {
+		problemsArr = append(problemsArr, problem)
+	}
+	if q.Shuffle {
+		rand.Shuffle(len(problemsArr), swapProblemArr(problemsArr))
+	}
 
 	quizResult := QuizResult{}
 
@@ -117,7 +136,7 @@ func (q *Quiz) Run() QuizResult {
 
 	quizFailed := false
 
-	for problem := range problems {
+	for _, problem := range problemsArr {
 		quizResult.Total++
 
 		if quizFailed {
