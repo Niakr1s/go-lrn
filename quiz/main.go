@@ -11,6 +11,7 @@ import (
 )
 
 var csvFilePath = flag.String("csv", "", "path to csv file in format 'question, answer'")
+var timeout = flag.Duration("timeout", time.Second*15, "quiz answer timeout")
 
 func init() {
 	flag.Parse()
@@ -23,6 +24,7 @@ func main() {
 	quiz := &Quiz{
 		ProblemProvider: problemProvider,
 		AnswerProvider:  answerProvider,
+		Timeout:         *timeout,
 	}
 	quizResult := quiz.Run()
 	fmt.Printf("Quiz ended: %v\n", quizResult)
@@ -109,7 +111,10 @@ func (q *Quiz) Run() QuizResult {
 
 	quizResult := QuizResult{}
 
+	fmt.Printf("Starting quiz with timeout=%s\n", q.Timeout)
+
 	quizFailed := false
+
 	for problem := range problems {
 		quizResult.Total++
 
@@ -119,14 +124,20 @@ func (q *Quiz) Run() QuizResult {
 		}
 
 		fmt.Println(problem.Question)
-		answer := <-answers
-		if problem.Answer != answer {
-			fmt.Printf("Incorrect.\n")
+
+		select {
+		case <-time.After(q.Timeout):
+			fmt.Printf("Time out.\n")
 			quizFailed = true
-			continue
+		case answer := <-answers:
+			if problem.Answer != answer {
+				fmt.Printf("Incorrect.\n")
+				quizFailed = true
+			} else {
+				fmt.Printf("Correct.\n")
+				quizResult.Solved++
+			}
 		}
-		fmt.Printf("Correct.\n")
-		quizResult.Solved++
 	}
 	return quizResult
 }
