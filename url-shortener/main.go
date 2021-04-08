@@ -18,12 +18,12 @@ func main() {
 	yamlPath := flag.String("yaml", "", "yaml config path")
 	flag.Parse()
 
-	var redirectsConfig NewRedirectsConfig = DefaultRedirectsConfig{}
+	var redirectSource RedirectSource = DefaultRedirectSource{}
 	if *yamlPath != "" {
-		redirectsConfig = YamlRedirectsConfig{Path: *yamlPath}
+		redirectSource = YamlRedirectSource{Path: *yamlPath}
 	}
 
-	redirects, err := newRedirects(redirectsConfig)
+	redirects, err := newRedirects(redirectSource)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,18 +32,18 @@ func main() {
 	http.ListenAndServe(":3333", http.HandlerFunc(redirectHandler(redirects)))
 }
 
-type NewRedirectsConfig interface{}
+type RedirectSource interface{}
 
-type DefaultRedirectsConfig struct{}
-type YamlRedirectsConfig struct {
+type DefaultRedirectSource struct{}
+type YamlRedirectSource struct {
 	Path string
 }
 
-func newRedirects(newRedirectsConfig NewRedirectsConfig) (Redirects, error) {
-	switch t := newRedirectsConfig.(type) {
-	case DefaultRedirectsConfig:
+func newRedirects(redirectSource RedirectSource) (Redirects, error) {
+	switch t := redirectSource.(type) {
+	case DefaultRedirectSource:
 		return defaultRedirects(), nil
-	case YamlRedirectsConfig:
+	case YamlRedirectSource:
 		return yamlRedirects(t.Path)
 	default:
 		return nil, fmt.Errorf("not known redirect source")
