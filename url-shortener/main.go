@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -16,11 +17,14 @@ type Redirects map[string]string
 
 func main() {
 	yamlPath := flag.String("yaml", "", "yaml config path")
+	jsonPath := flag.String("json", "", "json config path")
 	flag.Parse()
 
 	var redirectSource RedirectSource = DefaultRedirectSource{}
 	if *yamlPath != "" {
 		redirectSource = YamlRedirectSource{Path: *yamlPath}
+	} else if *jsonPath != "" {
+		redirectSource = JsonRedirectSource{Path: *jsonPath}
 	}
 
 	redirects, err := newRedirects(redirectSource)
@@ -39,12 +43,21 @@ type YamlRedirectSource struct {
 	Path string
 }
 
+type JsonRedirectSource struct {
+	Path string
+}
+
 func newRedirects(redirectSource RedirectSource) (Redirects, error) {
 	switch t := redirectSource.(type) {
 	case DefaultRedirectSource:
+		log.Printf("loaded default redirects")
 		return defaultRedirects(), nil
 	case YamlRedirectSource:
+		log.Printf("loaded yaml redirects from path %s\n", t.Path)
 		return yamlRedirects(t.Path)
+	case JsonRedirectSource:
+		log.Printf("loaded json redirects from path %s\n", t.Path)
+		return jsonRedirects(t.Path)
 	default:
 		return nil, fmt.Errorf("not known redirect source")
 	}
@@ -68,6 +81,21 @@ func yamlRedirects(yamlPath string) (Redirects, error) {
 	err = yaml.Unmarshal(contents, &redirects)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't parse yaml file: %v", err)
+	}
+
+	return redirects, nil
+}
+
+func jsonRedirects(jsonPath string) (Redirects, error) {
+	contents, err := ioutil.ReadFile(jsonPath)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't read json file: %v", err)
+	}
+
+	redirects := map[string]string{}
+	err = json.Unmarshal(contents, &redirects)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't parse json file: %v", err)
 	}
 
 	return redirects, nil
