@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  {{template "head"}}
+  <body>
+    <h2>{{.Title}}</h2>
+
+    <div>
+      {{range $index, $story := .Story}}
+      <p>{{$story}}</p>
+      {{end}}
+    </div>
+
+    <div class="options">
+      {{range $index, $option := .Options}}
+      <div class="option">
+        <a href="/{{$.AdventureName}}/{{$option.ArcName}}">{{$option.Text}}</a>
+      </div>
+      {{end}}
+    </div>
+
+    <div class="controls">
+      <div><a href="/{{$.AdventureName}}">Play again</a></div>
+      <div><a href="/">To main page</a></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "intro": {
+    "title": "The Little Blue Gopher",
+    "options": [
+      {
+        "text": "That story about the Sticky Bandits isn't real, it is from Home Alone 2! Let's head to New York.",
+        "arc": "intro"
+      },
+      {
+        "text": "Gee, those bandits sound pretty real to me. Let's play it safe and try our luck in Denver.",
+        "arc": "intro"
+      }
+    ]
+  }
+}

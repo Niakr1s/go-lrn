@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+  {{template "head"}}
+  <body>
+    <h2>Enjoy our adventures!</h2>
+    <ul>
+      {{range $advName, $adv := .}}
+      <li><a href="/{{$advName}}">{{$advName}}</a></li>
+      {{end}}
+    </ul>
+  </body>
+</html>
