@@ -16,6 +16,18 @@ type Arc struct {
 	Options []*Option `json:"options"`
 }
 
+func (a *Arc) HasOption(optionArcName string) bool {
+	if len(a.Options) == 0 && optionArcName == StartArc {
+		return true
+	}
+	for _, opt := range a.Options {
+		if opt.ArcName == optionArcName {
+			return true
+		}
+	}
+	return false
+}
+
 type Arcs map[string]*Arc
 
 func (a Arcs) FindArc(arcName string) (*Arc, error) {
