@@ -6,6 +6,7 @@ import (
 	"lrn/html-link-parser/parser"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 )
 
@@ -78,6 +79,9 @@ func (g *builder) processUrl(ctx context.Context, u *url.URL, depth int) {
 		if depth == 0 {
 			return
 		}
+		if !strings.HasPrefix(u.Scheme, "http") {
+			return
+		}
 
 		wasSet := g.setUrl(u)
 		if !wasSet {
@@ -102,7 +106,6 @@ func (g *builder) processUrl(ctx context.Context, u *url.URL, depth int) {
 			}
 			subUrl, err := makeUrl(u, link.Href)
 			if err != nil {
-				g.addError(err)
 				continue
 			}
 			if subUrl.Host != u.Host {
