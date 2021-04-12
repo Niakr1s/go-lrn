@@ -4,16 +4,15 @@ import (
 	"context"
 	"lrn/sitemap-builder/sitemap"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_GenerateSitemap(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*1000)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	res, err := sitemap.Build(ctx, "https://yandex.ru")
+	res, err := sitemap.Build(ctx, "https://www.calhoun.io")
 
 	t.Logf("%d links", len(res.Links))
 
