@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"golang.org/x/net/html"
 )
@@ -65,15 +66,15 @@ func nodeToLink(n *html.Node) Link {
 }
 
 func getInnerText(node *html.Node) string {
-	text := ""
+	buf := strings.Builder{}
 
 	forAllNodes(node, func(n *html.Node) {
 		if n.Type == html.TextNode {
-			text += n.Data
+			fmt.Fprint(&buf, n.Data)
 		}
 	})
 
-	return text
+	return buf.String()
 }
 
 func getAttribute(attr []html.Attribute, key string) (string, error) {
